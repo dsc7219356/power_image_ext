@@ -4,12 +4,14 @@
 
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:power_image_ext/remove_aware_map.dart';
 
+import 'image_info_ext.dart';
 import 'image_provider_ext.dart';
 
 
@@ -445,7 +447,11 @@ class ImageCacheExt extends ImageCache {
     void listener(ImageInfo? info, bool syncCall) {
       int? sizeBytes;
       if (info != null) {
-        sizeBytes = info.sizeBytes;
+        if (info is PowerImageInfo) {
+          sizeBytes = info.width! * info.height! * 4;
+        } else {
+          sizeBytes = info.image.height * info.image.width * 4;
+        }
         info.dispose();
       }
       final _CachedImage image = _CachedImage(
@@ -630,7 +636,7 @@ class ImageCacheStatus {
   }
 
   @override
-  int get hashCode => Object.hash(pending, keepAlive, live);
+  int get hashCode => hashValues(pending, keepAlive, live);
 
   @override
   String toString() => '${objectRuntimeType(this, 'ImageCacheStatus')}(pending: $pending, live: $live, keepAlive: $keepAlive)';
@@ -656,7 +662,7 @@ abstract class _CachedImageBase {
     assert(handle != null);
     // Give any interested parties a chance to listen to the stream before we
     // potentially dispose it.
-    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+    SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
       assert(handle != null);
       handle?.dispose();
       handle = null;

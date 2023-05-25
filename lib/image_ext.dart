@@ -17,14 +17,14 @@ typedef Widget CustomImageBuilder(BuildContext context, ImageInfo? imageInfo);
 /// Several constructors are provided for the various ways that an image can be
 /// specified:
 ///
-///  * [Image.new], for obtaining an image from an [ImageProvider].
-///  * [Image.asset], for obtaining an image from an [AssetBundle]
+///  * [new Image], for obtaining an image from an [ImageProvider].
+///  * [new Image.asset], for obtaining an image from an [AssetBundle]
 ///    using a key.
-///  * [Image.network], for obtaining an image from a URL.
-///  * [Image.file], for obtaining an image from a [File].
-///  * [Image.memory], for obtaining an image from a [Uint8List].
+///  * [new Image.network], for obtaining an image from a URL.
+///  * [new Image.file], for obtaining an image from a [File].
+///  * [new Image.memory], for obtaining an image from a [Uint8List].
 ///
-/// The following image formats are supported: {@macro dart.ui.imageFormats}
+/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
 /// To automatically perform pixel-density-aware asset resolution, specify the
 /// image using an [AssetImage] and make sure that a [MaterialApp], [WidgetsApp],
@@ -72,7 +72,7 @@ typedef Widget CustomImageBuilder(BuildContext context, ImageInfo? imageInfo);
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.
-///  * [Ink.image], which is the preferred way to show an image in a
+///  * [new Ink.image], which is the preferred way to show an image in a
 ///    material application (especially if the image is in a [Material] and will
 ///    have an [InkWell] on top of it).
 ///  * [Image](dart-ui/Image-class.html), the class in the [dart:ui] library.
@@ -83,7 +83,7 @@ class ImageExt extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
   /// To show an image from the network or from an asset bundle, consider using
-  /// [Image.network] and [Image.asset] respectively.
+  /// [new Image.network] and [new Image.asset] respectively.
   ///
   /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
   /// must not be null.
@@ -180,14 +180,40 @@ class ImageExt extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool dartpad}
+  /// {@tool dartpad --template=stateless_widget_material}
+  ///
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
   ///
   /// This sample contains a limited subset of the functionality that the
   /// [FadeInImage] widget provides out of the box.
   ///
-  /// ** See code in examples/api/lib/widgets/image/image.frame_builder.0.dart **
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return DecoratedBox(
+  ///     decoration: BoxDecoration(
+  ///       color: Colors.white,
+  ///       border: Border.all(),
+  ///       borderRadius: BorderRadius.circular(20),
+  ///     ),
+  ///     child: Image.network(
+  ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
+  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+  ///         if (wasSynchronouslyLoaded) {
+  ///           return child;
+  ///         }
+  ///         return AnimatedOpacity(
+  ///           child: child,
+  ///           opacity: frame == null ? 0 : 1,
+  ///           duration: const Duration(seconds: 1),
+  ///           curve: Curves.easeOut,
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
   /// {@end-tool}
   final ImageFrameBuilder? frameBuilder;
 
@@ -220,11 +246,37 @@ class ImageExt extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   ///
-  /// {@tool dartpad}
+  /// {@tool dartpad --template=stateless_widget_material}
+  ///
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.
   ///
-  /// ** See code in examples/api/lib/widgets/image/image.loading_builder.0.dart **
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return DecoratedBox(
+  ///     decoration: BoxDecoration(
+  ///       color: Colors.white,
+  ///       border: Border.all(),
+  ///       borderRadius: BorderRadius.circular(20),
+  ///     ),
+  ///     child: Image.network(
+  ///       'https://example.com/image.jpg',
+  ///       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+  ///         if (loadingProgress == null) {
+  ///           return child;
+  ///         }
+  ///         return Center(
+  ///           child: CircularProgressIndicator(
+  ///             value: loadingProgress.expectedTotalBytes != null
+  ///                 ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+  ///                 : null,
+  ///           ),
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
   /// {@end-tool}
   ///
   /// Run against a real-world image on a slow network, the previous example
@@ -240,11 +292,34 @@ class ImageExt extends StatefulWidget {
   /// [FlutterError.onError]. If it is provided, the caller should either handle
   /// the exception by providing a replacement widget, or rethrow the exception.
   ///
-  /// {@tool dartpad}
+  /// {@tool dartpad --template=stateless_widget_material}
+  ///
   /// The following sample uses [errorBuilder] to show a '😢' in place of the
   /// image that fails to load, and prints the error to the console.
   ///
-  /// ** See code in examples/api/lib/widgets/image/image.error_builder.0.dart **
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return DecoratedBox(
+  ///     decoration: BoxDecoration(
+  ///       color: Colors.white,
+  ///       border: Border.all(),
+  ///       borderRadius: BorderRadius.circular(20),
+  ///     ),
+  ///     child: Image.network(
+  ///       'https://example.does.not.exist/image.jpg',
+  ///       errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+  ///         // Appropriate logging or analytics, e.g.
+  ///         // myAnalytics.recordError(
+  ///         //   'An error occurred loading "https://example.does.not.exist/image.jpg"',
+  ///         //   exception,
+  ///         //   stackTrace,
+  ///         // );
+  ///         return const Text('😢');
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
   /// {@end-tool}
   final ImageErrorWidgetBuilder? errorBuilder;
 
@@ -472,7 +547,7 @@ class _ImageExtState extends State<ImageExt> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     if (widget.scrollAwareEnable) {
       _scrollAwareContext = DisposableBuildContext<State<ImageExt>>(this);
     }
@@ -481,7 +556,7 @@ class _ImageExtState extends State<ImageExt> with WidgetsBindingObserver {
   @override
   void dispose() {
     assert(_imageStream != null);
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     _stopListeningToStream();
     _completerHandle?.dispose();
     _scrollAwareContext?.dispose();
@@ -528,7 +603,7 @@ class _ImageExtState extends State<ImageExt> with WidgetsBindingObserver {
 
   void _updateInvertColors() {
     _invertColors = MediaQuery.maybeOf(context)?.invertColors
-        ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
+        ?? SemanticsBinding.instance!.accessibilityFeatures.invertColors;
   }
 
   void _resolveImage() {
@@ -563,10 +638,8 @@ class _ImageExtState extends State<ImageExt> with WidgetsBindingObserver {
             _lastStack = stackTrace;
           });
           assert(() {
-            if (widget.errorBuilder == null) {
-              // ignore: only_throw_errors, since we're just proxying the error.
+            if (widget.errorBuilder == null)
               throw error; // Ensures the error message is printed to the console.
-            }
             return true;
           }());
         }
@@ -708,7 +781,7 @@ class _ImageExtState extends State<ImageExt> with WidgetsBindingObserver {
         height: widget.height,
         scale: _imageInfo?.scale ?? 1.0,
         color: widget.color,
-        opacity: widget.opacity,
+        // opacity: widget.opacity,
         colorBlendMode: widget.colorBlendMode,
         fit: widget.fit,
         alignment: widget.alignment,
